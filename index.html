@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单解析工具</title>
+    <style>
+        body { font-family: sans-serif; padding: 15px; background: #f4f7f6; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        textarea { width: 100%; height: 150px; padding: 10px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 5px; }
+        button { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 5px; font-size: 18px; margin-top: 10px; cursor: pointer; }
+        table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background: #eee; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>订单智能解析</h2>
+    <textarea id="inputText" placeholder="输入：10公斤五花肉，20个西瓜..."></textarea>
+    <button onclick="parseText()">解析并生成表格</button>
+    <table id="resultTable">
+        <thead><tr><th>序</th><th>菜名</th><th>数量</th><th>单位</th></tr></thead>
+        <tbody id="resultBody"></tbody>
+    </table>
+</div>
+<script>
+    function parseText() {
+        const input = document.getElementById('inputText').value;
+        const tbody = document.getElementById('resultBody');
+        tbody.innerHTML = '';
+        const items = input.split(/[，,、\s和]+/);
+        let index = 1;
+        const units = "公斤|个|只|根|条|斤|克|两|箱|瓶|袋|包|把|块|件";
+        const regex = new RegExp("(\\d+)\\s*("+units+")?\\s*([\\u4e00-\\u9fa5]+)|([\\u4e00-\\u9fa5]+)\\s*(\\d+)\\s*("+units+")?");
+        items.forEach(item => {
+            if (!item.trim()) return;
+            const match = item.match(regex);
+            if (match) {
+                const qty = match[1] || match[5];
+                const unit = match[2] || match[6] || "";
+                const name = match[3] || match[4];
+                tbody.insertAdjacentHTML('beforeend', `<tr><td>${index++}</td><td>${name}</td><td>${qty}</td><td>${unit}</td></tr>`);
+            }
+        });
+    }
+</script>
+</body>
+</html>
