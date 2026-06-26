@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>订单解析工具</title>
+    <title>智能订单解析</title>
     <style>
         body { font-family: sans-serif; padding: 15px; background: #f4f7f6; }
         .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -16,7 +16,7 @@
 <body>
 <div class="container">
     <h2>订单智能解析</h2>
-    <textarea id="inputText" placeholder="例如：19公斤猪肉，9只鸭，3包烟"></textarea>
+    <textarea id="inputText" placeholder="输入：土鸡18只 或 18只土鸡..."></textarea>
     <button onclick="parseText()">解析并生成表格</button>
     <table id="resultTable">
         <thead><tr><th>菜名</th><th>数量</th><th>单位</th></tr></thead>
@@ -30,13 +30,17 @@
         tbody.innerHTML = '';
         const items = input.split(/[，,、\s]+/);
         
+        // 此正则支持：名称+数字+单位 或 数字+单位+名称
+        const regex = /([\u4e00-\u9fa5]+)?\s*(\d+)\s*(公斤|个|只|根|条|斤|克|两|箱|瓶|袋|包|把|块|件)?\s*([\u4e00-\u9fa5]+)?/;
+
         items.forEach(item => {
             if (!item.trim()) return;
-            const match = item.match(/(\d+)\s*(公斤|个|只|根|条|斤|克|两|箱|瓶|袋|包|把|块|件)?\s*([\u4e00-\u9fa5]+)/);
+            const match = item.match(regex);
             if (match) {
-                let name = match[3];
-                let qty = match[1];
-                let unit = match[2] || "";
+                // 如果match[1]有值，说明是“名称+数字”格式；否则是“数字+名称”格式
+                let name = match[1] || match[4];
+                let qty = match[2];
+                let unit = match[3] || "";
                 tbody.insertAdjacentHTML('beforeend', `<tr><td>${name}</td><td>${qty}</td><td>${unit}</td></tr>`);
             }
         });
